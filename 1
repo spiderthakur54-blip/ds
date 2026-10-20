@@ -1,130 +1,101 @@
--- Create Database
-CREATE DATABASE BANKING;
-USE BANKING;
 
--- Create CUSTOMER Table
-CREATE TABLE Customer (
-    Customer_ID INT PRIMARY KEY,
-    Customer_Name VARCHAR(50),
-    City VARCHAR(30),
-    Manager_ID INT
+
+CREATE DATABASE COLLEGE;
+USE COLLEGE;
+
+CREATE TABLE DEPT (
+    Dept_ID INT PRIMARY KEY,
+    Dept_Name VARCHAR(30),
+    Location VARCHAR(30)
 );
 
--- Create ACCOUNT Table
-CREATE TABLE Account (
-    Account_ID INT PRIMARY KEY,
-    Customer_ID INT,
-    Account_Type VARCHAR(20),
-    Balance DECIMAL(12,2),
-    FOREIGN KEY (Customer_ID)
-        REFERENCES Customer(Customer_ID)
+CREATE TABLE STUDENT (
+    Student_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Student_Name VARCHAR(50),
+    Email VARCHAR(100),
+    Age INT,
+    Gender VARCHAR(10),
+    Dept_ID INT,
+    Marks DECIMAL(5,2),
+    FOREIGN KEY (Dept_ID)
+        REFERENCES DEPT(Dept_ID)
 );
 
--- Create BANK_TRANSACTION Table
-CREATE TABLE Bank_Transaction (
-    Transaction_ID INT PRIMARY KEY,
-    Account_ID INT,
-    Transaction_Type VARCHAR(20),
-    Amount DECIMAL(12,2),
-    Transaction_Date DATE,
-    FOREIGN KEY (Account_ID)
-        REFERENCES Account(Account_ID)
+CREATE TABLE STUDENT (
+    Student_ID INT PRIMARY KEY AUTO_INCREMENT,
+    Student_Name VARCHAR(50),
+    Email VARCHAR(100),
+    Age INT,
+    Gender VARCHAR(10),
+    Dept_ID INT,
+    Marks DECIMAL(5,2),
+    FOREIGN KEY (Dept_ID)
+        REFERENCES DEPT(Dept_ID)
 );
 
--- Insert Customer Records
-INSERT INTO Customer
+INSERT INTO DEPT
 VALUES
-(101, 'Amit', 'Pune', NULL),
-(102, 'Priya', 'Mumbai', 101),
-(103, 'Rahul', 'Pune', 101),
-(104, 'Sneha', 'Nashik', 102),
-(105, 'Neha', 'Mumbai', NULL);
+(101, 'Computer', 'Pune'),
+(102, 'AI & DS', 'Pune'),
+(103, 'ENTC', 'Nagpur');
 
--- Insert Account Records
-INSERT INTO Account
+INSERT INTO STUDENT
+(Student_Name, Email, Age, Gender, Dept_ID, Marks)
 VALUES
-(201, 101, 'Savings', 80000),
-(202, 102, 'Current', 45000),
-(203, 103, 'Savings', 60000),
-(204, 104, 'Current', 25000),
-(205, 105, 'Savings', 90000);
+('Amit', 'amit@gmail.com', 20, 'Male', 101, 85),
+('Priya', 'priya@gmail.com', 19, 'Female', 102, 92),
+('Rahul', 'rahul@gmail.com', 21, 'Male', 101, 76),
+('Sneha', 'sneha@gmail.com', 20, 'Female', 103, 88),
+('Neha', 'neha@gmail.com', 19, 'Female', 102, 67);
 
--- Insert Transaction Records
-INSERT INTO Bank_Transaction
-VALUES
-(1, 201, 'Deposit', 15000, '2026-09-01'),
-(2, 201, 'Withdrawal', 5000, '2026-09-05'),
-(3, 202, 'Deposit', 20000, '2026-09-10'),
-(4, 203, 'Withdrawal', 3000, '2026-09-12'),
-(5, 204, 'Deposit', 12000, '2026-09-15'),
-(6, 205, 'Deposit', 25000, '2026-09-20');
 
--- Part A: INNER JOIN
-SELECT C.Customer_ID, C.Customer_Name,
-       A.Account_ID, A.Account_Type, A.Balance
-FROM Customer C
-INNER JOIN Account A
-ON C.Customer_ID = A.Customer_ID;
+CREATE VIEW STU AS
+SELECT * FROM STUDENT;
 
--- Part A: LEFT OUTER JOIN
-SELECT C.Customer_ID, C.Customer_Name,
-       A.Account_ID, A.Balance
-FROM Customer C
-LEFT JOIN Account A
-ON C.Customer_ID = A.Customer_ID;
+SELECT * FROM STU;
 
--- Part A: RIGHT OUTER JOIN
-SELECT C.Customer_Name, A.Account_ID,
-       A.Account_Type, A.Balance
-FROM Customer C
-RIGHT JOIN Account A
-ON C.Customer_ID = A.Customer_ID;
+ALTER TABLE STUDENT
+ADD Phone VARCHAR(15);
 
--- Part A: SELF JOIN
-SELECT C.Customer_Name AS Customer,
-       M.Customer_Name AS Manager
-FROM Customer C
-LEFT JOIN Customer M
-ON C.Manager_ID = M.Customer_ID;
+DESC STUDENT;
 
--- Part B: Create Banking_Details_View
-CREATE VIEW Banking_Details_View AS
-SELECT
-    C.Customer_ID,
-    C.Customer_Name,
-    C.City,
-    A.Account_ID,
-    A.Account_Type,
-    A.Balance,
-    T.Transaction_ID,
-    T.Transaction_Type,
-    T.Amount,
-    T.Transaction_Date
-FROM Customer C
-INNER JOIN Account A
-    ON C.Customer_ID = A.Customer_ID
-INNER JOIN Bank_Transaction T
-    ON A.Account_ID = T.Account_ID;
 
--- Display Banking Details View
-SELECT * FROM Banking_Details_View;
+SELECT * FROM STUDENT;
 
--- Part C: Create High_Value_Transaction_View
-CREATE VIEW High_Value_Transaction_View AS
-SELECT
-    T.Transaction_ID,
-    C.Customer_Name,
-    A.Account_ID,
-    T.Transaction_Type,
-    T.Amount,
-    T.Transaction_Date
-FROM Bank_Transaction T
-INNER JOIN Account A
-    ON T.Account_ID = A.Account_ID
-INNER JOIN Customer C
-    ON A.Customer_ID = C.Customer_ID
-WHERE T.Amount > 10000;
+SELECT Student_Name, Marks
+FROM STUDENT
+WHERE Marks > 80;
 
--- Display High Value Transaction View
-SELECT * FROM High_Value_Transaction_View;
+SELECT Student_Name, Marks
+FROM STUDENT
+ORDER BY Marks ASC;
 
+UPDATE STUDENT
+SET Marks = 90
+WHERE Student_ID = 1;
+
+SELECT S.Student_Name, D.Dept_Name
+FROM STUDENT S
+JOIN DEPT D
+ON S.Dept_ID = D.Dept_ID
+WHERE D.Dept_Name = 'AI & DS';
+
+SELECT Student_Name, Marks
+FROM STUDENT
+WHERE Marks BETWEEN 70 AND 90;
+
+SELECT COUNT(*) AS Total_Students
+FROM STUDENT;
+
+SELECT AVG(Marks) AS Average_Marks
+FROM STUDENT;
+
+SELECT MAX(Marks) AS Highest_Marks
+FROM STUDENT;
+
+DELETE FROM STUDENT
+WHERE Student_ID = 5;
+
+SELECT *
+FROM STUDENT
+WHERE Student_Name LIKE 'S%';
