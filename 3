@@ -1,124 +1,110 @@
 
-	CREATE DATABASE StudentCourse_db;
-	USE StudentCourse_db;
+CREATE DATABASE COLLEGE;
+USE COLLEGE;
 
-	CREATE TABLE Department(
-	dept_id INT PRIMARY KEY AUTO_INCREMENT,
-	dept_name VARCHAR(50) NOT NULL UNIQUE);
+CREATE TABLE DEPARTMENT (
+    Dept_ID INT PRIMARY KEY,
+    Dept_Name VARCHAR(50)
+);
 
-	CREATE TABLE Student(
-	stud_id INT PRIMARY KEY AUTO_INCREMENT,
-	stud_name VARCHAR(50) NOT NULL,
-	dept_id INT,
-	CGPA DECIMAL(3,2),
-	FOREIGN KEY (dept_id)
-		REFERENCES Department(dept_id));
-		
-	CREATE TABLE Course(
-	course_id INT PRIMARY KEY AUTO_INCREMENT,
-	course_name VARCHAR(100) NOT NULL,
-	dept_id INT,
-	FOREIGN KEY (dept_id)
-		REFERENCES Department(dept_id));
-		
-	CREATE TABLE Enrollment(
-	stud_id INT,
-	course_id INT,
-	PRIMARY KEY (stud_id,course_id),
-	FOREIGN KEY (stud_id) REFERENCES Student(stud_id),
-	FOREIGN KEY (course_id) REFERENCES Course(course_id));
+CREATE TABLE STUDENT (
+    Student_ID INT PRIMARY KEY,
+    Student_Name VARCHAR(50),
+    GPA DECIMAL(3,2),
+    Dept_ID INT,
+    FOREIGN KEY (Dept_ID) REFERENCES DEPARTMENT(Dept_ID)
+);
 
-	INSERT INTO Department(dept_name)
-	VALUES 
-	('computer sciene'),
-	('AIDS'),
-	('AIML'),
-	('ENTC'),
-	('IT');
+CREATE TABLE COURSE (
+    Course_ID INT PRIMARY KEY,
+    Course_Name VARCHAR(50),
+    Dept_ID INT,
+    FOREIGN KEY (Dept_ID) REFERENCES DEPARTMENT(Dept_ID)
+);
 
-	SELECT *FROM Department;
+CREATE TABLE ENROLLMENT (
+    Student_ID INT,
+    Course_ID INT,
+    PRIMARY KEY (Student_ID, Course_ID),
+    FOREIGN KEY (Student_ID) REFERENCES STUDENT(Student_ID),
+    FOREIGN KEY (Course_ID) REFERENCES COURSE(Course_ID)
+);
 
-	INSERT INTO Student(stud_name,dept_id,CGPA)
-	VALUES
-	('kunal',1,8.9),
-	('Aisha', 2, 9.5),
-	('Rahul', 1, 7.4),
-	('Elena', 3, 8.2),
-	('John', 4, 6.8);
+INSERT INTO DEPARTMENT VALUES
+(1, 'Computer'),
+(2, 'IT'),
+(3, 'Mechanical');
 
-	INSERT INTO Course (course_id, course_name, dept_id)
-	VALUES
-	(101, 'DBMS', 1),
-	(102, 'Operating Systems', 1),
-	(103, 'Computer Networks', 1),
-	(104, 'Software Engineering', 1),
-	(105, 'Machine Learning', 2),
-	(106, 'Artificial Intelligence', 2),
-	(107, 'Data Mining', 2),
-	(108, 'Statistics', 2),
-	(109, 'Thermodynamics', 3),
-	(110, 'Engineering Mechanics', 3);
+INSERT INTO STUDENT VALUES
+(101, 'Amit', 9.20, 1),
+(102, 'Rahul', 8.50, 1),
+(103, 'Priya', 9.50, 2),
+(104, 'Sneha', 7.80, 2),
+(105, 'Rohan', 8.90, 3),
+(106, 'Neha', 8.20, 1);
 
-	SELECT * FROM Course;
+INSERT INTO COURSE VALUES
+(201, 'DBMS', 1),
+(202, 'Java', 1),
+(203, 'Python', 1),
+(204, 'Networking', 2),
+(205, 'AI', 2),
+(206, 'Mechanics', 3),
+(207, 'Robotics', 3),
+(208, 'Cloud Computing', 2);
 
-	INSERT INTO Enrollment (stud_id, course_id)
-	VALUES
-	(1, 101), (1, 102), (1, 103), (1, 104),
-	(2, 105), (2, 106), (2, 107), (2, 108),
-	(3, 101), (3, 102),
-	(4, 105), (4, 106),
-	(5, 109);
+INSERT INTO ENROLLMENT VALUES
+(101, 201),
+(101, 202),
+(101, 203),
+(101, 204),
+(102, 201),
+(102, 202),
+(103, 204),
+(103, 205),
+(104, 205),
+(105, 206),
+(106, 201),
+(106, 202),
+(106, 203),
+(106, 204);
 
-	SELECT * FROM Enrollment;
+-- a) Display students with GPA greater than 8.0
+SELECT *
+FROM STUDENT
+WHERE GPA > 8.0;
 
-	SELECT * FROM Student
-	WHERE CGPA > 8.0;
+-- b) Display students and courses belonging to the same department
+SELECT S.Student_Name, C.Course_Name
+FROM STUDENT S
+JOIN ENROLLMENT E
+    ON S.Student_ID = E.Student_ID
+JOIN COURSE C
+    ON E.Course_ID = C.Course_ID
+WHERE S.Dept_ID = C.Dept_ID;
 
-	SELECT * FROM Department;
-	SELECT * FROM Course;
+-- c) Display courses with no enrolled students
+SELECT C.Course_ID, C.Course_Name
+FROM COURSE C
+LEFT JOIN ENROLLMENT E
+    ON C.Course_ID = E.Course_ID
+WHERE E.Student_ID IS NULL;
 
-	
+-- d) Display students enrolled in more than 3 courses
+SELECT S.Student_ID, S.Student_Name,
+       COUNT(E.Course_ID) AS Total_Courses
+FROM STUDENT S
+JOIN ENROLLMENT E
+    ON S.Student_ID = E.Student_ID
+GROUP BY S.Student_ID, S.Student_Name
+HAVING COUNT(E.Course_ID) > 3;
 
-
-	SELECT s.stud_id,s.stud_name
-	FROM Student s
-	JOIN Enrollment e ON e.stud_id = s.stud_id
-	JOIN Course c ON e.course_id = c.course_id
-	WHERE c.dept_id = s.dept_id
-	GROUP BY s.stud_id,s.stud_name,s.dept_id
-	HAVING COUNT(DISTINCT c.course_id) = (
-		SELECT COUNT(*)
-		FROM Course c2
-		WHERE c2.dept_id = s.dept_id
-		);
-		
-	SELECT c.course_id,c.course_name 
-	FROM Course c
-	LEFT JOIN Enrollment e
-	ON c.course_id = e.course_id
-	WHERE e.stud_id IS NULL;
-
-
-	SELECT * FROM Enrollment;
-
-
-	SELECT s.stud_id,s.stud_name,
-			COUNT(e.course_id) AS total_course
-	FROM Student s
-	JOIN Enrollment e 
-	ON s.stud_id = e.stud_id
-	GROUP BY s.stud_id,s.stud_name
-	HAVING COUNT(e.course_id) > 3;
-
-
-	SELECT s.stud_id,s.stud_name,s.dept_id,s.CGPA
-	FROM Student s
-	WHERE s.cgpa = (
-		SELECT MAX(s2.CGPA)
-		FROM Student s2
-		WHERE s2.dept_id = s.dept_id);
-
-
-		
-
-
+-- e) Display students with the highest GPA in each department
+SELECT S.Student_ID, S.Student_Name,
+       S.Dept_ID, S.GPA
+FROM STUDENT S
+WHERE S.GPA = (
+    SELECT MAX(S2.GPA)
+    FROM STUDENT S2
+    WHERE S2.Dept_ID = S.Dept_ID
+);
