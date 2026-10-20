@@ -1,0 +1,61 @@
+
+CREATE DATABASE Banking;
+USE Banking;
+
+CREATE TABLE Accounts (
+    Acc_No INT PRIMARY KEY,
+    Name VARCHAR(30),
+    Balance INT
+);
+
+INSERT INTO Accounts VALUES (101, 'Rahul', 10000);
+INSERT INTO Accounts VALUES (102, 'Amit', 5000);
+
+DELIMITER //
+
+CREATE PROCEDURE Transfer(
+    IN sender INT,
+    IN receiver INT,
+    IN amt INT
+)
+BEGIN
+    IF sender = receiver THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Sender and receiver must be different';
+
+    ELSEIF amt <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Amount must be positive';
+
+    ELSEIF (SELECT COUNT(*) FROM Accounts
+            WHERE Acc_No = sender) = 0
+        OR (SELECT COUNT(*) FROM Accounts
+            WHERE Acc_No = receiver) = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid account number';
+
+    ELSEIF (SELECT Balance FROM Accounts
+            WHERE Acc_No = sender) < amt THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Insufficient balance';
+
+    ELSE
+        START TRANSACTION;
+
+        UPDATE Accounts
+        SET Balance = Balance - amt
+        WHERE Acc_No = sender;
+
+        UPDATE Accounts
+        SET Balance = Balance + amt
+        WHERE Acc_No = receiver;
+
+        COMMIT;
+    END IF;
+END //
+
+DELIMITER ;
+
+CALL Transfer(101, 102, 2000);
+
+SELECT * FROM Accounts;
