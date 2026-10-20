@@ -1,0 +1,31 @@
+DBMS Assignment 2
+
+SHOW VARIABLES LIKE 'secure_file_priv';
+
+SELECT *
+FROM STUDENT
+INTO OUTFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/student.csv'
+FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
+
+SELECT *
+FROM STUDENT
+INTO OUTFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/student.txt'
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n';
+
+LOAD DATA LOCAL INFILE 'C:/Users/YourName/Downloads/student.csv'
+INTO TABLE STUDENT
+FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(Student_ID, Student_Name, Email, Age, Gender, Dept_ID, Marks);
+
+LOAD DATA LOCAL INFILE 'C:/Users/YourName/Downloads/student.txt'
+INTO TABLE STUDENT
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(Student_ID, Student_Name, Email, Age, Gender, Dept_ID, Marks);
