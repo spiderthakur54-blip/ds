@@ -1,0 +1,130 @@
+-- Create Database
+CREATE DATABASE BANKING;
+USE BANKING;
+
+-- Create CUSTOMER Table
+CREATE TABLE Customer (
+    Customer_ID INT PRIMARY KEY,
+    Customer_Name VARCHAR(50),
+    City VARCHAR(30),
+    Manager_ID INT
+);
+
+-- Create ACCOUNT Table
+CREATE TABLE Account (
+    Account_ID INT PRIMARY KEY,
+    Customer_ID INT,
+    Account_Type VARCHAR(20),
+    Balance DECIMAL(12,2),
+    FOREIGN KEY (Customer_ID)
+        REFERENCES Customer(Customer_ID)
+);
+
+-- Create BANK_TRANSACTION Table
+CREATE TABLE Bank_Transaction (
+    Transaction_ID INT PRIMARY KEY,
+    Account_ID INT,
+    Transaction_Type VARCHAR(20),
+    Amount DECIMAL(12,2),
+    Transaction_Date DATE,
+    FOREIGN KEY (Account_ID)
+        REFERENCES Account(Account_ID)
+);
+
+-- Insert Customer Records
+INSERT INTO Customer
+VALUES
+(101, 'Amit', 'Pune', NULL),
+(102, 'Priya', 'Mumbai', 101),
+(103, 'Rahul', 'Pune', 101),
+(104, 'Sneha', 'Nashik', 102),
+(105, 'Neha', 'Mumbai', NULL);
+
+-- Insert Account Records
+INSERT INTO Account
+VALUES
+(201, 101, 'Savings', 80000),
+(202, 102, 'Current', 45000),
+(203, 103, 'Savings', 60000),
+(204, 104, 'Current', 25000),
+(205, 105, 'Savings', 90000);
+
+-- Insert Transaction Records
+INSERT INTO Bank_Transaction
+VALUES
+(1, 201, 'Deposit', 15000, '2026-09-01'),
+(2, 201, 'Withdrawal', 5000, '2026-09-05'),
+(3, 202, 'Deposit', 20000, '2026-09-10'),
+(4, 203, 'Withdrawal', 3000, '2026-09-12'),
+(5, 204, 'Deposit', 12000, '2026-09-15'),
+(6, 205, 'Deposit', 25000, '2026-09-20');
+
+-- Part A: INNER JOIN
+SELECT C.Customer_ID, C.Customer_Name,
+       A.Account_ID, A.Account_Type, A.Balance
+FROM Customer C
+INNER JOIN Account A
+ON C.Customer_ID = A.Customer_ID;
+
+-- Part A: LEFT OUTER JOIN
+SELECT C.Customer_ID, C.Customer_Name,
+       A.Account_ID, A.Balance
+FROM Customer C
+LEFT JOIN Account A
+ON C.Customer_ID = A.Customer_ID;
+
+-- Part A: RIGHT OUTER JOIN
+SELECT C.Customer_Name, A.Account_ID,
+       A.Account_Type, A.Balance
+FROM Customer C
+RIGHT JOIN Account A
+ON C.Customer_ID = A.Customer_ID;
+
+-- Part A: SELF JOIN
+SELECT C.Customer_Name AS Customer,
+       M.Customer_Name AS Manager
+FROM Customer C
+LEFT JOIN Customer M
+ON C.Manager_ID = M.Customer_ID;
+
+-- Part B: Create Banking_Details_View
+CREATE VIEW Banking_Details_View AS
+SELECT
+    C.Customer_ID,
+    C.Customer_Name,
+    C.City,
+    A.Account_ID,
+    A.Account_Type,
+    A.Balance,
+    T.Transaction_ID,
+    T.Transaction_Type,
+    T.Amount,
+    T.Transaction_Date
+FROM Customer C
+INNER JOIN Account A
+    ON C.Customer_ID = A.Customer_ID
+INNER JOIN Bank_Transaction T
+    ON A.Account_ID = T.Account_ID;
+
+-- Display Banking Details View
+SELECT * FROM Banking_Details_View;
+
+-- Part C: Create High_Value_Transaction_View
+CREATE VIEW High_Value_Transaction_View AS
+SELECT
+    T.Transaction_ID,
+    C.Customer_Name,
+    A.Account_ID,
+    T.Transaction_Type,
+    T.Amount,
+    T.Transaction_Date
+FROM Bank_Transaction T
+INNER JOIN Account A
+    ON T.Account_ID = A.Account_ID
+INNER JOIN Customer C
+    ON A.Customer_ID = C.Customer_ID
+WHERE T.Amount > 10000;
+
+-- Display High Value Transaction View
+SELECT * FROM High_Value_Transaction_View;
+
