@@ -1,0 +1,124 @@
+
+	CREATE DATABASE StudentCourse_db;
+	USE StudentCourse_db;
+
+	CREATE TABLE Department(
+	dept_id INT PRIMARY KEY AUTO_INCREMENT,
+	dept_name VARCHAR(50) NOT NULL UNIQUE);
+
+	CREATE TABLE Student(
+	stud_id INT PRIMARY KEY AUTO_INCREMENT,
+	stud_name VARCHAR(50) NOT NULL,
+	dept_id INT,
+	CGPA DECIMAL(3,2),
+	FOREIGN KEY (dept_id)
+		REFERENCES Department(dept_id));
+		
+	CREATE TABLE Course(
+	course_id INT PRIMARY KEY AUTO_INCREMENT,
+	course_name VARCHAR(100) NOT NULL,
+	dept_id INT,
+	FOREIGN KEY (dept_id)
+		REFERENCES Department(dept_id));
+		
+	CREATE TABLE Enrollment(
+	stud_id INT,
+	course_id INT,
+	PRIMARY KEY (stud_id,course_id),
+	FOREIGN KEY (stud_id) REFERENCES Student(stud_id),
+	FOREIGN KEY (course_id) REFERENCES Course(course_id));
+
+	INSERT INTO Department(dept_name)
+	VALUES 
+	('computer sciene'),
+	('AIDS'),
+	('AIML'),
+	('ENTC'),
+	('IT');
+
+	SELECT *FROM Department;
+
+	INSERT INTO Student(stud_name,dept_id,CGPA)
+	VALUES
+	('kunal',1,8.9),
+	('Aisha', 2, 9.5),
+	('Rahul', 1, 7.4),
+	('Elena', 3, 8.2),
+	('John', 4, 6.8);
+
+	INSERT INTO Course (course_id, course_name, dept_id)
+	VALUES
+	(101, 'DBMS', 1),
+	(102, 'Operating Systems', 1),
+	(103, 'Computer Networks', 1),
+	(104, 'Software Engineering', 1),
+	(105, 'Machine Learning', 2),
+	(106, 'Artificial Intelligence', 2),
+	(107, 'Data Mining', 2),
+	(108, 'Statistics', 2),
+	(109, 'Thermodynamics', 3),
+	(110, 'Engineering Mechanics', 3);
+
+	SELECT * FROM Course;
+
+	INSERT INTO Enrollment (stud_id, course_id)
+	VALUES
+	(1, 101), (1, 102), (1, 103), (1, 104),
+	(2, 105), (2, 106), (2, 107), (2, 108),
+	(3, 101), (3, 102),
+	(4, 105), (4, 106),
+	(5, 109);
+
+	SELECT * FROM Enrollment;
+
+	SELECT * FROM Student
+	WHERE CGPA > 8.0;
+
+	SELECT * FROM Department;
+	SELECT * FROM Course;
+
+	
+
+
+	SELECT s.stud_id,s.stud_name
+	FROM Student s
+	JOIN Enrollment e ON e.stud_id = s.stud_id
+	JOIN Course c ON e.course_id = c.course_id
+	WHERE c.dept_id = s.dept_id
+	GROUP BY s.stud_id,s.stud_name,s.dept_id
+	HAVING COUNT(DISTINCT c.course_id) = (
+		SELECT COUNT(*)
+		FROM Course c2
+		WHERE c2.dept_id = s.dept_id
+		);
+		
+	SELECT c.course_id,c.course_name 
+	FROM Course c
+	LEFT JOIN Enrollment e
+	ON c.course_id = e.course_id
+	WHERE e.stud_id IS NULL;
+
+
+	SELECT * FROM Enrollment;
+
+
+	SELECT s.stud_id,s.stud_name,
+			COUNT(e.course_id) AS total_course
+	FROM Student s
+	JOIN Enrollment e 
+	ON s.stud_id = e.stud_id
+	GROUP BY s.stud_id,s.stud_name
+	HAVING COUNT(e.course_id) > 3;
+
+
+	SELECT s.stud_id,s.stud_name,s.dept_id,s.CGPA
+	FROM Student s
+	WHERE s.cgpa = (
+		SELECT MAX(s2.CGPA)
+		FROM Student s2
+		WHERE s2.dept_id = s.dept_id);
+
+
+		
+
+
