@@ -1,0 +1,41 @@
+-- 1. Create Database
+CREATE DATABASE EmployeeDB;
+USE EmployeeDB;
+
+-- 2. Create Employee Table
+CREATE TABLE Employee (
+    Emp_ID INT PRIMARY KEY,
+    Emp_Name VARCHAR(50),
+    Salary DECIMAL(10,2),
+    Age INT
+);
+
+-- 3. Create BEFORE INSERT Trigger
+DELIMITER //
+
+CREATE TRIGGER before_employee_insert
+BEFORE INSERT ON Employee
+FOR EACH ROW
+BEGIN
+    IF NEW.Salary <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Salary must be greater than zero';
+    END IF;
+
+    IF NEW.Age <= 18 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Age must be greater than 18';
+    END IF;
+END //
+
+DELIMITER ;
+
+-- 4. Insert Valid Records
+INSERT INTO Employee
+VALUES
+(101, 'Amit', 30000, 25),
+(102, 'Priya', 40000, 28),
+(103, 'Rahul', 35000, 30);
+
+-- 5. Display Employee Records
+SELECT * FROM Employee;
